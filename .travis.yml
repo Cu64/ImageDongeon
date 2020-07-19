@@ -3,6 +3,9 @@ language: go
 go:
     - 1.14.x
 
+services:
+    - mysql
+
 addons:
     mariadb: '10.0'
 
