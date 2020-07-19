@@ -1,0 +1,12 @@
+language: go
+
+go:
+    - 1.14.x
+
+services:
+    - docker
+
+before_install:
+    - docker-compose up -d
+    - docker-compose exec sql mysql -u root -pSuchPassword -e "CREATE DATABASE imagedongeon; GRANT ALL PRIVILEGES ON imagedongeon.* TO dongeonguard;"
+    - docker-compose exec sql mysql -u root -pSuchPassword -e "USE imagedongeon; CREATE TABLE imagedongeon ( id BIGINT NOT NULL AUTO_INCREMENT, md5_hash TEXT NOT NULL, tags MEDIUMTEXT NOT NULL, post_time TEXT NOT NULL, img_size TEXT, rating TEXT, image LONGTEXT NOT NULL, PRIMARY KEY (id) );"
