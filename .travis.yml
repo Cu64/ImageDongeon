@@ -3,10 +3,10 @@ language: go
 go:
     - 1.14.x
 
-services:
-    - docker
+addons:
+    mariadb: '10.0'
 
 before_install:
-    - docker-compose up -d
-    - docker-compose exec sql mysql -u root -pSuchPassword -e "CREATE DATABASE imagedongeon; GRANT ALL PRIVILEGES ON imagedongeon.* TO dongeonguard;"
-    - docker-compose exec sql mysql -u root -pSuchPassword -e "USE imagedongeon; CREATE TABLE imagedongeon ( id BIGINT NOT NULL AUTO_INCREMENT, md5_hash TEXT NOT NULL, tags MEDIUMTEXT NOT NULL, post_time TEXT NOT NULL, img_size TEXT, rating TEXT, image LONGTEXT NOT NULL, PRIMARY KEY (id) );"
+    - mysql -e "CREATE USER 'dongeonguard' IDENTIFIED BY 'SuchWow'"
+    - mysql -e "CREATE DATABASE imagedongeon; GRANT ALL PRIVILEGES ON imagedongeon.* TO dongeonguard;"
+    - mysql -e "USE imagedongeon; CREATE TABLE imagedongeon ( id BIGINT NOT NULL AUTO_INCREMENT, md5_hash TEXT NOT NULL, tags MEDIUMTEXT NOT NULL, post_time TEXT NOT NULL, img_size TEXT, rating TEXT, image LONGTEXT NOT NULL, PRIMARY KEY (id) );"
