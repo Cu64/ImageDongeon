@@ -6,9 +6,6 @@ go:
 services:
     - mysql
 
-addons:
-    mariadb: '10.0'
-
 before_install:
     - mysql -e "CREATE USER 'dongeonguard' IDENTIFIED BY 'SuchWow'"
     - mysql -e "CREATE DATABASE imagedongeon; GRANT ALL PRIVILEGES ON imagedongeon.* TO dongeonguard;"
