@@ -90,7 +90,7 @@ def deletePost(id):
 
 
 @app.route('/api/v1.0/posts/search', methods=['GET'])
-def searchPost():
+def searchPostByTags():
     connection = pymysql.connect(
         host='localhost',
         user='dongeonguard',
@@ -110,6 +110,26 @@ def searchPost():
     finally:
         connection.close()
     return jsonify(posts)
+
+
+@app.route('/api/v1.0/posts/<id>', methods=['GET'])
+def searchPostByID(id):
+    connection = pymysql.connect(
+        host='localhost',
+        user='dongeonguard',
+        password='SuchWow',
+        db='imagedongeon',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT id, md5_hash, tags, post_time, height, "\
+                  "width, rating FROM imagedongeon WHERE id=%s"
+            cursor.execute(sql, (id))
+            post = cursor.fetchone()
+    finally:
+        connection.close()
+    return jsonify(post)
 
 
 if __name__ == "__main__":
