@@ -10,11 +10,6 @@ from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
 
-@app.route('/api/v1.0', methods=['GET'])
-def index():
-    return "Welcome to Image Dongeon's API."
-
-
 @app.route('/api/v1.0/posts/upload', methods=['POST'])
 def uploadPost():
     connection = pymysql.connect(
