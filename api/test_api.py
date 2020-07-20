@@ -5,7 +5,7 @@ import json
 
 class TestAPI:
     def test_upload(self):
-        url = "http://127.0.0.1:8080/api/v1.0/posts"\
+        url = "http://localhost:8080/api/v1.0/posts"\
             "/upload?tags=test_image+test_tag+highres&rating=safe"
         with open("wl-logo.png", "rb") as f:
             image = f.read()
@@ -23,11 +23,11 @@ class TestAPI:
         assert data['width'] == 512
 
     def test_get_image(self):
-        url = "http://127.0.0.1:8080/api/v1.0/images/1"
+        url = "http://localhost:8080/api/v1.0/images/1"
         response = requests.request("GET", url)
         assert response.status_code == 200
 
     def test_delete_image(self):
-        url = "http://127.0.0.1:8080/api/v1.0/posts/delete/1"
+        url = "http://localhost:8080/api/v1.0/posts/delete/1"
         response = requests.request("DELETE", url)
         assert response.text == "Image deleted"
