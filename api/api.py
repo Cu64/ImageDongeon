@@ -89,9 +89,9 @@ def deletePost(id):
             sql = "DELETE FROM imagedongeon WHERE id=%s"
             cursor.execute(sql, (id))
             connection.commit()
+        return "Image deleted"
     finally:
         connection.close()
-        return "Image deleted"
 
 
 if __name__ == "__main__":
