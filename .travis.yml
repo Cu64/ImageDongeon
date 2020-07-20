@@ -3,4 +3,4 @@ python:
     - "3.8"
 install:
     - pip install -r api/requirements.txt
-script: python3 api/api.py && cd api && pytest
+script: python3 api/api.py & cd api & pytest
