@@ -7,7 +7,7 @@ class TestAPI:
     def test_upload(self):
         url = "http://localhost:8080/api/v1.0/posts"\
             "/upload?tags=test_image+test_tag+highres&rating=safe"
-        with open("wl-logo.png", "rb") as f:
+        with open("api/wl-logo.png", "rb") as f:
             image = f.read()
         payload = image
         headers = {
