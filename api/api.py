@@ -36,7 +36,7 @@ def uploadPost():
         with connection.cursor() as cursor:
             sql = "INSERT INTO imagedongeon(md5_hash, tags, post_time, height, width,\
                  rating, image) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            values = (post['md5_hash'], ", ".join(post['tags']),
+            values = (post['md5_hash'], " ".join(post['tags']),
                       post['post_time'], post['height'], post['width'],
                       post['rating'], image)
             cursor.execute(sql, values)
@@ -107,6 +107,8 @@ def searchPostByTags():
             sql = "SELECT id, md5_hash, tags, post_time, height, width, rating FROM imagedongeon WHERE {0}".format(" AND ".join(tag_query))
             cursor.execute(sql)
             posts = cursor.fetchall()
+            for post in posts:
+                post["tags"] = post["tags"].split(" ")
     finally:
         connection.close()
     return jsonify(posts)
@@ -127,6 +129,7 @@ def searchPostByID(id):
                   "width, rating FROM imagedongeon WHERE id=%s"
             cursor.execute(sql, (id))
             post = cursor.fetchone()
+            post["tags"] = post["tags"].split(" ")
     finally:
         connection.close()
     return jsonify(post)
@@ -165,9 +168,11 @@ def getAllPosts():
                   "height, width, rating FROM imagedongeon"
             cursor.execute(sql)
             posts = cursor.fetchall()
-            return jsonify(posts)
+            for post in posts:
+                post["tags"] = post["tags"].split(" ")
     finally:
         connection.close()
+    return jsonify(posts)
 
 
 if __name__ == "__main__":
