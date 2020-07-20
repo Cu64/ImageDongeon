@@ -132,5 +132,43 @@ def searchPostByID(id):
     return jsonify(post)
 
 
+@app.route('/api/v1.0/posts/deleteall', methods=['DELETE'])
+def deleteAllPosts():
+    connection = pymysql.connect(
+        host='localhost',
+        user='dongeonguard',
+        password='SuchWow',
+        db='imagedongeon',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "TRUNCATE imagedongeon"
+            cursor.execute(sql)
+            return "Wiped Database"
+    finally:
+        connection.close()
+
+
+@app.route('/api/v1.0/posts/all', methods=['GET'])
+def getAllPosts():
+    connection = pymysql.connect(
+        host='localhost',
+        user='dongeonguard',
+        password='SuchWow',
+        db='imagedongeon',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT id, md5_hash, tags, post_time, "\
+                  "height, width, rating FROM imagedongeon"
+            cursor.execute(sql)
+            posts = cursor.fetchall()
+            return jsonify(posts)
+    finally:
+        connection.close()
+
+
 if __name__ == "__main__":
     app.run(port=8080)
