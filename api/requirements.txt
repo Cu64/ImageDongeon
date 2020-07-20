@@ -1,3 +1,8 @@
 Flask
 numpy
+pytest
+flake8
+PyMySQL
+pytest-cov
+python-magic
 opencv-python
