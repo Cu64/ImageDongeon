@@ -26,6 +26,8 @@ def uploadPost():
     post['rating'] = request.args.get('rating')
     image = request.get_data()
     post['tags'] = tags.split(" ")
+    for tag in tags:
+        tag = re.sub('[^a-zA-Z_]', '', tag)
     post['md5_hash'] = hashlib.md5(image).digest().hex()
     post['post_time'] = int(time.time())
     try:
@@ -48,7 +50,7 @@ def uploadPost():
     return jsonify(post)
 
 
-@app.route('/api/v1.0/images/<id>', methods=['GET'])
+@app.route('/api/v1.0/images/<int:id>', methods=['GET'])
 def getImage(id):
     connection = pymysql.connect(
         host=credentials.host,
@@ -72,7 +74,7 @@ def getImage(id):
         connection.close()
 
 
-@app.route('/api/v1.0/posts/delete/<id>', methods=['DELETE'])
+@app.route('/api/v1.0/posts/delete/<int:id>', methods=['DELETE'])
 def deletePost(id):
     connection = pymysql.connect(
         host=credentials.host,
@@ -118,7 +120,7 @@ def searchPostByTags():
     return jsonify(posts)
 
 
-@app.route('/api/v1.0/posts/<id>', methods=['GET'])
+@app.route('/api/v1.0/posts/<int:id>', methods=['GET'])
 def searchPostByID(id):
     connection = pymysql.connect(
         host=credentials.host,
@@ -179,7 +181,7 @@ def getAllPosts():
     return jsonify(posts)
 
 
-@app.route('/posts/<id>')
+@app.route('/posts/<int:id>')
 def viewPost(id):
     return render_template("base.html.jinja")
 
