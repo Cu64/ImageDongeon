@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 import cv2
 import time
 import magic
@@ -100,6 +101,8 @@ def searchPostByTags():
         cursorclass=pymysql.cursors.DictCursor
     )
     tags = request.args.get('tags')
+    for tag in tags:
+        tag = re.sub('[^a-zA-Z_]', '', tag)
     try:
         with connection.cursor() as cursor:
             tag_query = []
