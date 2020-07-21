@@ -5,6 +5,7 @@ import magic
 import hashlib
 import numpy as np
 import pymysql.cursors
+import credentials
 from flask import Flask, jsonify, request, Response
 
 app = Flask(__name__)
@@ -13,10 +14,10 @@ app = Flask(__name__)
 @app.route('/api/v1.0/posts/upload', methods=['POST'])
 def uploadPost():
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     post = {}
@@ -49,10 +50,10 @@ def uploadPost():
 @app.route('/api/v1.0/images/<id>', methods=['GET'])
 def getImage(id):
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     try:
@@ -73,10 +74,10 @@ def getImage(id):
 @app.route('/api/v1.0/posts/delete/<id>', methods=['DELETE'])
 def deletePost(id):
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     try:
@@ -92,10 +93,10 @@ def deletePost(id):
 @app.route('/api/v1.0/posts/search', methods=['GET'])
 def searchPostByTags():
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     tags = request.args.get('tags')
@@ -117,10 +118,10 @@ def searchPostByTags():
 @app.route('/api/v1.0/posts/<id>', methods=['GET'])
 def searchPostByID(id):
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     try:
@@ -138,10 +139,10 @@ def searchPostByID(id):
 @app.route('/api/v1.0/posts/deleteall', methods=['DELETE'])
 def deleteAllPosts():
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     try:
@@ -156,10 +157,10 @@ def deleteAllPosts():
 @app.route('/api/v1.0/posts/all', methods=['GET'])
 def getAllPosts():
     connection = pymysql.connect(
-        host='localhost',
-        user='dongeonguard',
-        password='SuchWow',
-        db='imagedongeon',
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
         cursorclass=pymysql.cursors.DictCursor
     )
     try:
