@@ -5,7 +5,7 @@ import json
 def test_upload():
     url = "http://localhost:8080/api/v1.0/posts"\
         "/upload?tags=test_image+test_tag+highres&rating=safe"
-    with open("api/wl-logo.png", "rb") as f:
+    with open("wl-logo.png", "rb") as f:
         image = f.read()
     payload = image
     headers = {
@@ -42,7 +42,7 @@ def test_delete_all_posts():
 def test_search_by_tags():
     url = "http://localhost:8080/api/v1.0/posts"\
         "/upload?tags=test_image+test_tag+highres&rating=safe"
-    with open("api/wl-logo.png", "rb") as f:
+    with open("wl-logo.png", "rb") as f:
         image = f.read()
     payload = image
     headers = {
@@ -74,7 +74,7 @@ def test_search_by_id():
 def test_get_all_posts():
     url = "http://localhost:8080/api/v1.0/posts"\
         "/upload?tags=test_image+test_tag+highres&rating=safe"
-    with open("api/wl-logo.png", "rb") as f:
+    with open("wl-logo.png", "rb") as f:
         image = f.read()
     payload = image
     headers = {

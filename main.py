@@ -6,7 +6,7 @@ import hashlib
 import numpy as np
 import pymysql.cursors
 import credentials
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, render_template
 
 app = Flask(__name__)
 
@@ -174,6 +174,11 @@ def getAllPosts():
     finally:
         connection.close()
     return jsonify(posts)
+
+
+@app.route('/posts/<id>')
+def viewPost(id):
+    return render_template("base.html.jinja")
 
 
 if __name__ == "__main__":
