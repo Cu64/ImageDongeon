@@ -207,17 +207,17 @@ def resetSettings():
         connection.close()
 
 
-@app.route('/api/v1.0/settings/featured_post', methods=['GET'])
-def getFeaturedPost():
-    connection = pymysql.connect(
-        host=credentials.host,
-        user=credentials.user,
-        password=credentials.password,
-        db=credentials.db,
-        cursorclass=pymysql.cursors.DictCursor
-    )
-    try:
-        with connection.cursor() as cursor:
+# @app.route('/api/v1.0/settings/featured_post', methods=['GET'])
+# def getFeaturedPost():
+#     connection = pymysql.connect(
+#         host=credentials.host,
+#         user=credentials.user,
+#         password=credentials.password,
+#         db=credentials.db,
+#         cursorclass=pymysql.cursors.DictCursor
+#     )
+#     try:
+#         with connection.cursor() as cursor:
 
 
 if __name__ == "__main__":
