@@ -182,8 +182,8 @@ def getAllPosts():
     return jsonify(posts)
 
 
-@app.route('/posts/<int:id>')
-def viewPost(id):
+@app.route('/api/v1.0/settings/reset', methods=['DELETE'])
+def resetSettings():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -193,13 +193,16 @@ def viewPost(id):
     )
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT id, md5_hash, tags, post_time, height, "\
-                  "width, rating FROM imagedongeon WHERE id=%s"
-            cursor.execute(sql, (id))
-            post = cursor.fetchone()
-            post["tags"] = post["tags"].split(" ")
-            post["post_time"] = datetime.fromtimestamp(post["post_time"]).strftime("%Y-%m-%d %H:%M:%S")
-            return render_template("posts.html.jinja", post=post)
+            queries = [
+                "TRUNCATE imagedongeon_settings",
+                "INSERT INTO imagedongeon_settings"
+                "(`key`, `value`) VALUES ('featured_post', '0')"
+            ]
+            for query in queries:
+                print(query)
+                cursor.execute(query)
+                connection.commit()
+            return "Reset all settings."
     finally:
         connection.close()
 

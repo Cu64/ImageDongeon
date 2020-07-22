@@ -8,5 +8,6 @@ install:
 before-script:
     - mysql -e "CREATE USER 'dongeonguard' IDENTIFIED BY 'SuchWow'"
     - mysql -e "CREATE DATABASE imagedongeon; GRANT ALL PRIVILEGES ON imagedongeon.* TO dongeonguard;"
-    - mysql -e "USE imagedongeon; CREATE TABLE imagedongeon ( id BIGINT NOT NULL AUTO_INCREMENT, md5_hash TEXT NOT NULL, tags MEDIUMTEXT NOT NULL, post_time INT NOT NULL, height INT NOT NULL, width INT NOT NULL, rating TEXT, image LONGBLOB NOT NULL, PRIMARY KEY (id) );"
+    - mysql -e "USE imagedongeon; CREATE TABLE imagedongeon ( id BIGINT NOT NULL AUTO_INCREMENT, md5_hash TEXT NOT NULL, tags MEDIUMTEXT NOT NULL, post_time INT NOT NULL, height INT NOT NULL, width INT NOT NULL, rating TEXT, image LONGBLOB NOT NULL, PRIMARY KEY (id) ); CREATE TABLE imagedongeon_settings (id INT NOT NULL AUTO_INCREMENT, `key` TEXT, `value` TEXT, PRIMARY KEY (id));"
+    - mysql -e ""
 script: python3 main.py & pytest
