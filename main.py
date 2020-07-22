@@ -5,8 +5,9 @@ import time
 import magic
 import hashlib
 import numpy as np
-import pymysql.cursors
 import credentials
+import pymysql.cursors
+from datetime import datetime
 from flask import Flask, jsonify, request, Response, render_template
 
 app = Flask(__name__)
@@ -183,7 +184,24 @@ def getAllPosts():
 
 @app.route('/posts/<int:id>')
 def viewPost(id):
-    return render_template("base.html.jinja")
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT id, md5_hash, tags, post_time, height, "\
+                  "width, rating FROM imagedongeon WHERE id=%s"
+            cursor.execute(sql, (id))
+            post = cursor.fetchone()
+            post["tags"] = post["tags"].split(" ")
+            post["post_time"] = datetime.fromtimestamp(post["post_time"]).strftime("%Y-%m-%d %H:%M:%S")
+            return render_template("posts.html.jinja", post=post)
+    finally:
+        connection.close()
 
 
 if __name__ == "__main__":
