@@ -3,7 +3,9 @@ python:
     - "3.6"
 dist: precise
 addons:
-    mariadb: '10.0'      
+    mariadb: '10.0'
+before-instal:
+    - sudo apt-get -y install libmagic-dev
 install:
     - pip install -r requirements.txt
 before-script:
