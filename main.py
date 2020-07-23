@@ -124,6 +124,23 @@ def getThumb(id):
         connection.close()
 
 
+@app.route('/api/v1.0/thumbs/deleteall', methods=['DELETE'])
+def deleteAllThumbnails():
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("TRUNCATE thumbnails")
+        return "Deleted cached thumbnails."
+    finally:
+        connection.close()
+
+
 @app.route('/api/v1.0/posts/delete/<int:id>', methods=['DELETE'])
 def deletePost(id):
     connection = pymysql.connect(
