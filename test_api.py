@@ -24,7 +24,7 @@ def test_upload():
 def test_get_image():
     url = "http://localhost:8080/api/v1.0/images/1"
     response = requests.request("GET", url)
-    assert response.status_code == 200 or response.status_code == 500
+    assert response.status_code == 200
 
 
 def test_delete_image():

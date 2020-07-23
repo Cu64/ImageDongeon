@@ -2,11 +2,12 @@
 import re
 import cv2
 import time
-import magic
 import hashlib
 import numpy as np
 import credentials
+from PIL import Image
 import pymysql.cursors
+from io import BytesIO
 from flask import Flask, jsonify, request, Response
 
 app = Flask(__name__)
@@ -77,13 +78,44 @@ def getImage(id):
         with connection.cursor() as cursor:
             sql = "SELECT image FROM posts WHERE post_id=%s"
             cursor.execute(sql, (id))
-            image = cursor.fetchone()
+            image = cursor.fetchone()['image']
+            im = Image.open(BytesIO(image))
             try:
-                return Response(image['image'],
-                                mimetype=magic.from_buffer(image['image'],
-                                mime=True))
+                return Response(image, mimetype=Image.MIME[im.format])
             except TypeError:
                 return "Image is not found in DB/is deleted."
+    finally:
+        connection.close()
+
+
+@app.route('/api/v1.0/thumbs/<int:id>', methods=['GET'])
+def getThumb(id):
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM thumbnails WHERE thumb_id='{}' LIMIT 1;"
+            cursor.execute(sql.format(id))
+            result = cursor.fetchone()
+            if result is None:
+                sql = "SELECT * FROM posts WHERE post_id='{}'"
+                cursor.execute(sql.format(id))
+                image = cursor.fetchone()['image']
+                im = Image.open(BytesIO(image))
+                basewidth = 300
+                wpercent = (basewidth/float(im.size[0]))
+                hsize = int((float(im.size[1])*float(wpercent)))
+                thumbnail = im.resize((basewidth, hsize), Image.ANTIALIAS)
+                temp = BytesIO()
+                thumbnail.save(temp, format="jpeg", quality='web_maximum')
+                return Response(temp.getvalue(), mimetype='image/jpeg')
+            else:
+                return ""
     finally:
         connection.close()
 
@@ -254,7 +286,6 @@ def resetSettings():
                 "(`key`, `value`) VALUES ('featured_post', '0')"
             ]
             for query in queries:
-                print(query)
                 cursor.execute(query)
                 connection.commit()
             return "Reset all settings."
