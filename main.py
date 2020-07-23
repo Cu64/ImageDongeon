@@ -112,10 +112,14 @@ def getThumb(id):
                 hsize = int((float(im.size[1])*float(wpercent)))
                 thumbnail = im.resize((basewidth, hsize), Image.ANTIALIAS)
                 temp = BytesIO()
-                thumbnail.save(temp, format="jpeg", quality='web_maximum')
-                return Response(temp.getvalue(), mimetype='image/jpeg')
+                thumbnail.save(temp, format="png", quality='web_maximum')
+                sql = "INSERT INTO thumbnails(thumb_id, image) VALUES (%s, %s)"
+                values = (id, temp.getvalue())
+                cursor.execute(sql, values)
+                connection.commit()
+                return Response(temp.getvalue(), mimetype='image/png')
             else:
-                return ""
+                return Response(result['image'], mimetype='image/png')
     finally:
         connection.close()
 
