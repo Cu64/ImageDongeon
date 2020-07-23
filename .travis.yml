@@ -1,6 +1,7 @@
 language: python
 python:
     - "3.8"
+dist: precise
 addons:
     mariadb: '10.0'      
 install:
