@@ -95,3 +95,30 @@ def test_get_all_posts():
     assert data[1]['rating'] == "safe"
     assert data[1]['tags'] == ["test_image", "test_tag", "highres"]
     assert data[1]['width'] == 512
+
+
+def test_reset_all_settings():
+    url = "http://localhost:8080/api/v1.0/settings/reset"
+    response = requests.request("DELETE", url)
+    assert response.text == "Reset all settings."
+
+
+def test_feature_post():
+    url = "http://localhost:8080/api/v1.0/settings/feature_post/1"
+    response = requests.request("POST", url)
+    data = json.loads(response.text)
+    assert data['featured_post'] == 1
+
+
+def test_get_featured_post():
+    url = "http://localhost:8080/api/v1.0/settings/featured_post"
+    response = requests.request("GET", url)
+    data = json.loads(response.text)
+    assert data['featured_post'] == 1
+
+
+def test_get_all_tags():
+    url = "http://localhost:8080/api/v1.0/tags/all"
+    response = requests.request("GET", url)
+    data = json.loads(response.text)
+    assert data["tags"] == ["test_image", "test_tag", "highres"]
