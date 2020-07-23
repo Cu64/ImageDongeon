@@ -4,6 +4,5 @@ pytest
 flake8
 PyMySQL
 requests
-pytest-cov
 python-magic
 opencv-python
