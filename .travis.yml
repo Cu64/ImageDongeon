@@ -1,8 +1,8 @@
 language: python
 python:
     - "3.8"
-services:
-    - mysql
+addons:
+    mariadb: '10.0'      
 install:
     - pip install -r requirements.txt
 before-script:
