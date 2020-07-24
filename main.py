@@ -356,6 +356,46 @@ def featurePost(id):
         connection.close()
 
 
+@app.route('/api/v1.0/tags/<string:name>', methods=['GET'])
+def getTag(name):
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM tags WHERE name='{}'".format(name))
+            tags = cursor.fetchone()
+    finally:
+        connection.close()
+    return jsonify(tags)
+
+
+@app.route('/api/v1.0/tags/setdesc/<string:name>', methods=['GET'])
+def setDescription(name):
+    description = request.args.get('description')
+    description = re.sub('[^a-zA-Z_ ]', '', description)
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE tags SET description='{}' WHERE name='{}'"
+            cursor.execute(sql.format(description, name))
+            connection.commit()
+            return "Updated tag"
+    finally:
+        connection.close()
+    return jsonify()
+
+
 @app.route('/api/v1.0/tags/all', methods=['GET'])
 def getAllTags():
     connection = pymysql.connect(
