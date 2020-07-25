@@ -193,7 +193,10 @@ def searchPostByTags():
             post_ids = []
             for post in posts:
                 post_ids.append(str(post["post_id"]))
-            cursor.execute(sql.format(", ".join(post_ids)))
+            try:
+                cursor.execute(sql.format(", ".join(post_ids)))
+            except pymysql.err.ProgrammingError:
+                return "false"
             result = cursor.fetchall()
             for post in posts:
                 post['tags'] = []
