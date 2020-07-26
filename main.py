@@ -8,9 +8,12 @@ import credentials
 from PIL import Image
 import pymysql.cursors
 from io import BytesIO
+from flask_cors import CORS
 from flask import Flask, jsonify, request, Response
 
 app = Flask(__name__)
+#TODO: Fucking remove CORS from literally fucking everywhere.
+CORS(app)
 
 
 @app.route('/api/v1.0/posts/upload', methods=['POST'])
@@ -26,6 +29,8 @@ def uploadPost():
     tags = request.args.get('tags')
     post['rating'] = request.args.get('rating')
     image = request.get_data()
+    print(type(image))
+    print(str(image)[0:10])
     post['tags'] = tags.split(" ")
     for tag in post['tags']:
         tag = re.sub('[^a-zA-Z_]', '', tag)
