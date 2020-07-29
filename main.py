@@ -289,7 +289,10 @@ def get_all_posts():
             post_ids = []
             for post in posts:
                 post_ids.append(str(post["post_id"]))
-            cursor.execute(sql.format(", ".join(post_ids)))
+            try:
+                cursor.execute(sql.format(", ".join(post_ids)))
+            except pymysql.err.ProgrammingError:
+                return jsonify(success=False)
             result = cursor.fetchall()
             for post in posts:
                 post['tags'] = []
@@ -453,6 +456,62 @@ def import_gelbooru(id):
     elif data['rating'] == 's':
         post['rating'] = "safe"
     post['tags'] = data['tags'].split(" ")
+    image_url = data['file_url']
+    response = requests.get(image_url)
+    image = response.content
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO posts(md5_hash, post_time, height, width, "\
+                      "rating, image) VALUES (%s, %s, %s, %s, %s, %s);"
+            values = (post['md5_hash'], post['post_time'], post['height'],
+                      post['width'], post['rating'], image)
+            cursor.execute(sql, values)
+            cursor.execute("SET @post_id = LAST_INSERT_ID();")
+            for tag in post['tags']:
+                sql = "SELECT * FROM tags WHERE name='{}' LIMIT 1;"
+                cursor.execute(sql.format(tag))
+                exist = cursor.fetchone()
+                if exist is None:
+                    sql = "INSERT INTO tags (name) VALUES ('{}')".format(tag)
+                    cursor.execute(sql)
+                    cursor.execute("SET @tag_id = LAST_INSERT_ID();")
+                else:
+                    sql = "SELECT @tag_id := tag_id FROM tags WHERE name='{}';"
+                    cursor.execute(sql.format(tag))
+                sql = "INSERT INTO post_tag_map (post_id, tag_id)"\
+                      " VALUES(@post_id, @tag_id);"
+                cursor.execute(sql)
+        connection.commit()
+    finally:
+        connection.close()
+    return jsonify(post)
+
+
+@app.route('/api/v1.0/import/danbooru/<int:id>', methods=['POST'])
+def import_danbooru(id):
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    url = "https://danbooru.donmai.us/posts/{}.json"
+    url = url.format(id)
+    response = requests.get(url)
+    data = json.loads(response.text)
+    post = {}
+    post['md5_hash'] = data['md5']
+    post['post_time'] = int(time.time())
+    post['height'] = data['image_height']
+    post['width'] = data['image_width']
+    if data['rating'] == 'e':
+        post['rating'] = "explicit"
+    elif data['rating'] == 'q':
+        post['rating'] = "questionable"
+    elif data['rating'] == 's':
+        post['rating'] = "safe"
+    post['tags'] = data['tag_string'].split(" ")
     image_url = data['file_url']
     response = requests.get(image_url)
     image = response.content
