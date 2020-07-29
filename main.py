@@ -31,8 +31,6 @@ def upload_post():
     tags = request.args.get('tags')
     post['rating'] = request.args.get('rating')
     image = request.get_data()
-    print(type(image))
-    print(str(image)[0:10])
     post['tags'] = tags.split(" ")
     for tag in post['tags']:
         tag = re.sub('[^a-zA-Z_]', '', tag)
