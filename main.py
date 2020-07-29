@@ -2,7 +2,9 @@
 import re
 import cv2
 import time
+import json
 import hashlib
+import requests
 import numpy as np
 import credentials
 from PIL import Image
@@ -12,12 +14,12 @@ from flask_cors import CORS
 from flask import Flask, jsonify, request, Response
 
 app = Flask(__name__)
-#TODO: Fucking remove CORS from literally fucking everywhere.
+# TODO: Fucking remove CORS from literally fucking everywhere.
 CORS(app)
 
 
 @app.route('/api/v1.0/posts/upload', methods=['POST'])
-def uploadPost():
+def upload_post():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -71,7 +73,7 @@ def uploadPost():
 
 
 @app.route('/api/v1.0/images/<int:id>', methods=['GET'])
-def getImage(id):
+def get_image(id):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -94,7 +96,7 @@ def getImage(id):
 
 
 @app.route('/api/v1.0/thumbs/<int:id>', methods=['GET'])
-def getThumb(id):
+def get_thumb(id):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -130,7 +132,7 @@ def getThumb(id):
 
 
 @app.route('/api/v1.0/thumbs/deleteall', methods=['DELETE'])
-def deleteAllThumbnails():
+def delete_all_thumbnails():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -141,13 +143,13 @@ def deleteAllThumbnails():
     try:
         with connection.cursor() as cursor:
             cursor.execute("TRUNCATE thumbnails")
-        return "Deleted cached thumbnails."
+        return jsonify(success=True)
     finally:
         connection.close()
 
 
 @app.route('/api/v1.0/posts/delete/<int:id>', methods=['DELETE'])
-def deletePost(id):
+def delete_post(id):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -164,13 +166,13 @@ def deletePost(id):
             for query in queries:
                 cursor.execute(query, (id))
             connection.commit()
-        return "Image deleted"
+        return jsonify(success=True)
     finally:
         connection.close()
 
 
 @app.route('/api/v1.0/posts/search', methods=['GET'])
-def searchPostByTags():
+def search_post_by_tags():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -206,14 +208,16 @@ def searchPostByTags():
             for post in posts:
                 post['tags'] = []
             for tag in result:
-                posts[tag['post_id'] - 1]['tags'].append(tag['name'])
+                for post in posts:
+                    if post['post_id'] == tag['post_id']:
+                        posts[posts.index(post)]['tags'].append(tag['name'])
     finally:
         connection.close()
     return jsonify(posts)
 
 
 @app.route('/api/v1.0/posts/<int:id>', methods=['GET'])
-def searchPostByID(id):
+def search_post_by_id(id):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -241,7 +245,7 @@ def searchPostByID(id):
 
 
 @app.route('/api/v1.0/posts/deleteall', methods=['DELETE'])
-def deleteAllPosts():
+def delete_all_posts():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -260,13 +264,13 @@ def deleteAllPosts():
             ]
             for query in queries:
                 cursor.execute(query)
-            return "Wiped Database"
+            return jsonify(success=True)
     finally:
         connection.close()
 
 
 @app.route('/api/v1.0/posts/all', methods=['GET'])
-def getAllPosts():
+def get_all_posts():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -299,7 +303,7 @@ def getAllPosts():
 
 
 @app.route('/api/v1.0/settings/reset', methods=['DELETE'])
-def resetSettings():
+def reset_settings():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -317,13 +321,13 @@ def resetSettings():
             for query in queries:
                 cursor.execute(query)
                 connection.commit()
-            return "Reset all settings."
+            return jsonify(success=True)
     finally:
         connection.close()
 
 
 @app.route('/api/v1.0/settings/featured_post', methods=['GET'])
-def getFeaturedPost():
+def get_featured_post():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -345,7 +349,7 @@ def getFeaturedPost():
 
 
 @app.route('/api/v1.0/settings/feature_post/<int:id>', methods=['POST'])
-def featurePost(id):
+def feature_post(id):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -365,7 +369,7 @@ def featurePost(id):
 
 
 @app.route('/api/v1.0/tags/<string:name>', methods=['GET'])
-def getTag(name):
+def get_tag(name):
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -382,8 +386,8 @@ def getTag(name):
     return jsonify(tags)
 
 
-@app.route('/api/v1.0/tags/setdesc/<string:name>', methods=['GET'])
-def setDescription(name):
+@app.route('/api/v1.0/tags/setdesc/<string:name>', methods=['POST'])
+def set_description(name):
     description = request.args.get('description')
     description = re.sub('[^a-zA-Z_ ]', '', description)
     connection = pymysql.connect(
@@ -398,14 +402,14 @@ def setDescription(name):
             sql = "UPDATE tags SET description='{}' WHERE name='{}'"
             cursor.execute(sql.format(description, name))
             connection.commit()
-            return "Updated tag"
+            return jsonify(success=True)
     finally:
         connection.close()
     return jsonify()
 
 
 @app.route('/api/v1.0/tags/all', methods=['GET'])
-def getAllTags():
+def get_all_tags():
     connection = pymysql.connect(
         host=credentials.host,
         user=credentials.user,
@@ -423,6 +427,63 @@ def getAllTags():
     finally:
         connection.close()
     return jsonify(tags=tag_names)
+
+
+@app.route('/api/v1.0/import/gelbooru/<int:id>', methods=['POST'])
+def import_gelbooru(id):
+    connection = pymysql.connect(
+        host=credentials.host,
+        user=credentials.user,
+        password=credentials.password,
+        db=credentials.db,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    url = "https://gelbooru.com/index.php?page="\
+          "dapi&s=post&q=index&json=1&id={}"
+    url = url.format(id)
+    response = requests.get(url)
+    data = json.loads(response.text)[0]
+    post = {}
+    post['md5_hash'] = data['hash']
+    post['post_time'] = int(time.time())
+    post['height'] = data['height']
+    post['width'] = data['width']
+    if data['rating'] == 'e':
+        post['rating'] = "explicit"
+    elif data['rating'] == 'q':
+        post['rating'] = "questionable"
+    elif data['rating'] == 's':
+        post['rating'] = "safe"
+    post['tags'] = data['tags'].split(" ")
+    image_url = data['file_url']
+    response = requests.get(image_url)
+    image = response.content
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO posts(md5_hash, post_time, height, width, "\
+                      "rating, image) VALUES (%s, %s, %s, %s, %s, %s);"
+            values = (post['md5_hash'], post['post_time'], post['height'],
+                      post['width'], post['rating'], image)
+            cursor.execute(sql, values)
+            cursor.execute("SET @post_id = LAST_INSERT_ID();")
+            for tag in post['tags']:
+                sql = "SELECT * FROM tags WHERE name='{}' LIMIT 1;"
+                cursor.execute(sql.format(tag))
+                exist = cursor.fetchone()
+                if exist is None:
+                    sql = "INSERT INTO tags (name) VALUES ('{}')".format(tag)
+                    cursor.execute(sql)
+                    cursor.execute("SET @tag_id = LAST_INSERT_ID();")
+                else:
+                    sql = "SELECT @tag_id := tag_id FROM tags WHERE name='{}';"
+                    cursor.execute(sql.format(tag))
+                sql = "INSERT INTO post_tag_map (post_id, tag_id)"\
+                      " VALUES(@post_id, @tag_id);"
+                cursor.execute(sql)
+        connection.commit()
+    finally:
+        connection.close()
+    return jsonify(post)
 
 
 if __name__ == "__main__":
